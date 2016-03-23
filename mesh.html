@@ -1,0 +1,105 @@
+<html>
+<head>
+<script src="http://code.jquery.com/jquery-2.2.1.min.js"></script>
+<script type="text/javascript" src="jquery-2.2.1.min.js"></script>
+<script>
+$(document).ready(function(){
+	var canvas=document.getElementById("my_canvas");
+	var context=canvas.getContext("2d");
+	//var ch=800, cw=600;
+	canvas.height=window.innerHeight;
+	canvas.width=window.innerWidth;
+	var ch=canvas.height, cw=canvas.width;
+	var rect = canvas.getBoundingClientRect();
+	var node, mouse, number;
+	var	threshold=200, velocity=5;
+	var pcolor="#fff", bcolor="#111", base=255, mul=239;
+	function init(){
+		number=cw*ch*20/(800*600);
+		node=[];
+		mouse={
+			x:0,
+			y:0
+		};
+		for(var i=0 ; i<number ; i++){
+			node.push({
+				x:Math.floor(Math.random()*cw),
+				y:Math.floor(Math.random()*ch),
+				vx:Math.floor((Math.random()-0.5)*velocity),
+				vy:Math.floor((Math.random()-0.5)*velocity)
+			});
+		}
+		
+		k=setInterval(draw, 35);
+	}
+	$(document).mousemove(function (d){
+		mouse.x=d.pageX-rect.left, mouse.y=d.pageY-rect.top;
+	});
+	$(document).mousedown(function (d){
+		if(bcolor=="#eee")
+			bcolor="#111";
+		else
+			bcolor="#eee";
+		if(pcolor=="#fff")
+			pcolor="#000";
+		else
+			pcolor="#fff";
+		if(base==0){
+			base=255;
+			mul=239;
+		}
+		else{
+			base=0;
+			mul=-239;
+		}
+	});
+	init();
+	function drawLine(x1, y1, x2, y2){
+		var d=Math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
+		if(d<threshold){
+			t=base-Math.floor((d/threshold)*mul);
+			context.strokeStyle="rgb(" + t + "," + t + "," + t + ")";
+			context.beginPath();
+			context.moveTo(x1, y1); 
+			context.lineTo(x2, y2);
+			context.stroke();
+			context.closePath();
+		}
+	}
+	init();
+	function draw(){
+	context.fillStyle=bcolor;
+	context.fillRect(0,0,cw,ch);
+	context.fillStyle=pcolor;
+	
+		for(var i=0 ; i<number ; i++){
+			for(var j=i+1 ; j<number ; j++){
+				drawLine(node[i].x,node[i].y,node[j].x,node[j].y);
+			}
+				
+			node[i].x+=node[i].vx;
+			node[i].y+=node[i].vy;
+			if(node[i].x>cw)
+				node[i].x-=cw;	
+			else if(node[i].x<0)
+				node[i].x+=cw;
+			if(node[i].y>ch)
+				node[i].y-=ch;
+			else if(node[i].y<0)
+				node[i].y+=ch;
+		}
+		for(var j=0 ; j<number ; j++){
+			drawLine(mouse.x,mouse.y,node[j].x,node[j].y);
+			context.fillRect(node[j].x-1,node[j].y-1,2,2);
+			
+		}
+		context.fillRect(mouse.x-2,mouse.y-2,4,4);
+	};
+});
+</script>
+	<title>Mesh</title>
+</head>
+<body>
+	<canvas id="my_canvas" style="position:absolute; left:0px; top:0px; cursor: none;"></canvas>
+</body>
+</html>

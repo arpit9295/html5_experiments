@@ -1,0 +1,154 @@
+<!Doctype html>
+<html>
+<head>
+<title>
+  Brick
+</title>
+<meta charset="utf-8">
+<script src="http://code.jquery.com/jquery-2.2.1.min.js"></script>
+<script src="jquery-2.2.1.min.js"></script>
+<script>
+$(document).ready(function(){
+	var canvas=document.getElementById('mycanvas');
+	var ctx=canvas.getContext('2d');
+	canvas.width = 500; //document.width is obsolete
+    canvas.height = 600; //document.height is obsolete
+    var cw=canvas.width;
+	var ch=canvas.height;
+	var py=350;
+	var ph=20;
+	var og=150;//obstacle gap
+	var oh=20;//obstacle height
+	var od=130;
+	var ay=+0.6;
+	var ocolor="#AAF";
+	var pcolor="#333";
+	var obstacle;
+	var player;
+	var score, highscore=0;
+	var k;
+	function init()
+	{
+		obstacle=[];
+		create_obstacle();
+		player={
+			vy:-10,
+			vx:3,
+			y:py,
+			x:Math.floor(cw/2)
+		};
+		score=0;
+		setTimeout(function(){
+		k=setInterval(draw, 15);
+		}, 3000);
+	}
+	ctx.fillStyle="#EEE";
+	ctx.fillRect(0,0,cw,ch);
+	ctx.fillStyle="black";
+	ctx.font="30px sans-serif";
+	ctx.textAlign = "center";
+	ctx.fillText("The (Not so) Amazing Brick",cw/2,ch/2);
+	ctx.font="15px sans-serif";
+	ctx.fillText("(Left And Right Arrow Keys)",cw/2,ch/2+40);
+	
+	ctx.textAlign = "left";
+	ctx.fillText("SCORE",8,ch-10);
+	ctx.textAlign = "right";
+	ctx.fillText("HIGHSCORE",cw-8,ch-10);
+	ctx.textAlign = "left";
+	
+	init();
+	
+	function create_obstacle(){
+		
+		 var temp = Math.floor(Math.random()*(cw-og));
+		 obstacle.unshift({
+			x1 : 0,
+			w1 : temp,
+			x2 : temp+150,
+			w2 : cw-temp-150,
+			y : -20,
+			passed:0
+		 });
+	}
+
+	$(document).keydown(function (e){
+		var key = event.which;
+		if(key==37){
+			player.vx=-2.5;
+			player.vy=-9;
+		}
+		if(key==39){
+			player.vx=+2.5;
+			player.vy=-9;
+		};
+	})
+	
+	function draw(){
+		if(score>highscore)
+			highscore=score;
+		ctx.fillStyle="#EEE";
+		ctx.fillRect(0,0,cw,ch);
+		if(!collision()){
+			player.x=player.x+player.vx;
+			player.y=player.y+player.vy;
+			player.vy=player.vy+ay;
+			ctx.fillStyle="#EEE";
+			ctx.fillRect(0,0,cw,ch);
+			if(obstacle[0].y==od)
+				create_obstacle();
+			if(obstacle[obstacle.length-1].y > ch){
+				obstacle.pop();
+			}
+			for (var key in obstacle){
+				
+				ctx.fillStyle=ocolor;
+				ctx.fillRect(obstacle[key].x1,obstacle[key].y,obstacle[key].w1,oh);
+				ctx.fillRect(obstacle[key].x2,obstacle[key].y,obstacle[key].w2,oh);
+				obstacle[key].y+=1;
+			}
+			
+			ctx.fillStyle=pcolor;
+			ctx.fillRect(player.x, player.y, ph, ph);
+			ctx.font="20px sans-serif";
+			ctx.textAlign="left";
+			ctx.fillText(score,5,ch-5);
+			ctx.textAlign="right";
+			ctx.fillText(highscore,cw-5,ch-5);
+		}
+		else{	
+			var ScoreText="Score : "+score;
+			ctx.fillStyle="black";
+			ctx.font="20px sans-serif";
+			ctx.textAlign="center"; 
+			ctx.fillText(ScoreText, cw/2, ch/2);
+			clearInterval(k);
+			setTimeout(function(){
+				init();
+			}, 3000); 
+		}
+	}
+	function collision(){
+		for (var key  in obstacle){
+			if((obstacle[key].y<player.y+ph && obstacle[key].y>player.y-ph) && (obstacle[key].w1>=player.x || obstacle[key].x2<=(player.x+20)))
+				return 1;
+			if(player.y>(ch-ph) || player.y<0 || player.x>(cw-ph) || player.x<0)
+				return 1;
+			if(obstacle[key].y<player.y+ph && obstacle[key].y>player.y-ph){
+				if(obstacle[key].passed==0)
+					score++;
+				obstacle[key].passed=1;
+				
+			}
+		
+			
+		}
+		return 0;
+	}
+});
+</script>
+<body>
+	<canvas id="mycanvas">
+</body>
+</head>
+</html>

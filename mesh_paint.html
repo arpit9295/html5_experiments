@@ -1,0 +1,80 @@
+<html>
+<head>
+<script src="http://code.jquery.com/jquery-2.2.1.min.js"></script>
+<script>
+$(document).ready(function(){
+	var canvas=document.getElementById("my_canvas");
+	var context=canvas.getContext("2d");
+	canvas.height=window.innerHeight;
+	canvas.width=window.innerWidth;
+	var ch=canvas.height, cw=canvas.width;
+	var rect = canvas.getBoundingClientRect();
+	var node, mouse, number;
+	var threshold=200;
+	var pcolor="#fff", bcolor="#111", base=255, mul=239;
+	function init(){
+		number=1;
+		node=[];
+		mouse={
+			x:0,
+			y:0
+		};
+		node.push({
+			x:cw/2,
+			y:ch/2,
+			vx:0,
+			vy:0
+		});
+		draw();
+	}
+	
+	$(document).mousemove(function (d){
+		mouse.x=d.pageX, mouse.y=d.pageY;
+		draw();
+	});
+	$(document).mousedown(function (e){
+		mouse.x=e.pageX, mouse.y=e.pageY;
+		node.push({
+				x:Math.floor(mouse.x),
+				y:Math.floor(mouse.y),
+				vx:0,
+				vy:0
+		});
+		number+=1;
+	});
+	init();
+	function drawLine(x1, y1, x2, y2){
+		var d=Math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
+		if(d<threshold){
+			t=base-Math.floor((d/threshold)*mul);
+			context.strokeStyle="rgb(" + t + "," + t + "," + t + ")";
+			context.beginPath();
+			context.moveTo(x1, y1); 
+			context.lineTo(x2, y2);
+			context.stroke();
+			context.closePath();
+		}
+	}
+	init();
+	function draw(){
+	context.fillStyle=bcolor;
+	context.fillRect(0,0,cw,ch);
+	context.fillStyle=pcolor;
+	
+		for(var i=0 ; i<number ; i++){
+			drawLine(mouse.x,mouse.y,node[i].x,node[i].y);
+			for(var j=i+1 ; j<number ; j++){
+				drawLine(node[i].x,node[i].y,node[j].x,node[j].y);
+			}
+			context.fillRect(node[i].x-1,node[i].y-1,2,2);
+		}
+		context.fillRect(mouse.x-2,mouse.y-2,4,4);
+	};
+});
+</script>
+	<title>Mesh Paint</title>
+</head>
+<body>
+	<canvas id="my_canvas" style="position:absolute; left:0px; top:0px; cursor: none;"></canvas>
+</body>
+</html>

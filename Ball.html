@@ -1,0 +1,138 @@
+<!Doctype html>
+<html>
+<head>
+<title>
+  Tap the ball
+</title>
+<meta charset="utf-8">
+<script src="http://code.jquery.com/jquery-2.2.1.min.js"></script>
+<script src="jquery-2.2.1.min.js"></script>
+
+
+
+<script>
+$(document).ready(function(){
+	var canvas=document.getElementById('mycanvas');
+	var ctx=canvas.getContext('2d');
+	canvas.width = 500; //document.width is obsolete
+    canvas.height = 600; //document.height is obsolete
+    var cw=canvas.width;
+	var ch=canvas.height;
+	var rect = canvas.getBoundingClientRect();
+	var ay=0.4;
+	var base=500;
+	var base_color="#666";
+	var ball_color="#E98";
+	var ball;
+	var score, highscore;
+	var k, root2;
+	function init()
+	{
+		ball={
+			vx:0,
+			vy:0,
+			r:30,
+			y:base-50,
+			x:Math.floor(cw/2)
+		};
+		highscore=score=0;
+		ctx.fillStyle="#EEE";
+		ctx.fillRect(0,0,cw,ch);
+		ctx.fillStyle="black";
+		ctx.font="30px sans-serif";
+		ctx.textAlign = "center";
+		ctx.fillText("Tap the ball",cw/2,ch/2);
+		ctx.font="10px sans-serif";
+		//ctx.fillStyle="#AAA";
+		ctx.textAlign = "left";
+		ctx.fillText("SCORE",8,15);
+		ctx.textAlign = "right";
+		ctx.fillText("HIGHSCORE",cw-8,15);
+		setTimeout(function(){
+		k=setInterval(draw, 15);
+		}, 3000);
+		root2=Math.sqrt(0.5)*ball.r;
+	}
+	init();
+	
+	
+
+	$(document).mousedown(function (d){
+		var x1=ball.x, y1=ball.y, x2=d.pageX-rect.left, y2=d.pageY-rect.top;
+		var d = Math.sqrt( (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) );
+		if(d<ball.r){
+			score++;
+			ball.vx=((x1-x2)/ball.r)*10;
+			ball.vy=-10;
+		}
+		
+	});
+/*	$(document).on('vmousedown', function(e){
+		var rect = canvas.getBoundingClientRect();
+		var x1=ball.x, y1=ball.y, x2=e.pageX-rect.left, y2=e.pageY-rect.top;
+		var d = Math.sqrt( (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) );
+		console.log(x1, x2, y1, y2, Math.sqrt( (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) ), ball.r);
+		if(d<ball.r){
+			score++;
+			ball.vx=((x1-x2)/ball.r)*10;
+			ball.vy=-10;
+		}
+    });*/
+
+	function draw(){
+		ctx.fillStyle="#EEE";
+		ctx.fillRect(0,0,cw,ch);
+		ctx.fillStyle = '#DDDDDD';
+		ctx.beginPath();
+		ctx.moveTo(ball.x-root2, ball.y-root2);
+		ctx.lineTo(ball.x+root2, ball.y+root2);
+		ctx.lineTo(ball.x+2*root2-ch+ball.y, ch);
+		ctx.lineTo(ball.x-root2-ch+ball.y, ch);
+		ctx.closePath();
+		ctx.fill();
+
+		ctx.fillStyle=ball_color;
+		ctx.beginPath();
+		ctx.arc(ball.x,ball.y,ball.r,0,2*Math.PI);
+		ctx.fill();
+		ctx.closePath();
+		if(score>highscore)
+			highscore=score;
+		if(ball.y+ball.vy < base-ball.r)
+			ball.y=ball.y+ball.vy;
+		else{
+			score=0;
+			ball.y=base-ball.r;
+			ball.vy=(-0.5)*ball.vy;
+			ball.vx=0.8*ball.vx;
+		}
+		ball.vy=ball.vy+ay;
+		if(ball.x<ball.r){
+			ball.vx=-(0.5)*ball.vx;
+			ball.x=ball.r;
+		}
+		else if(ball.x>(cw-ball.r)){
+			ball.vx=-(0.5)*ball.vx;
+			ball.x=cw-ball.r;
+		}
+		else
+			ball.x=ball.x+ball.vx;
+		ctx.fillStyle="#AAA";
+		ctx.font="30px sans-serif";
+		ctx.textAlign = "left";
+		ctx.fillText(score,5,30);
+		ctx.textAlign = "right";
+		ctx.fillText(highscore,cw-5,30);
+		ctx.fillStyle=base_color;
+		ctx.fillRect(0,base,cw, ch-base);
+
+		
+	};
+
+});
+</script>
+<body>
+	<canvas id="mycanvas">
+</body>
+</head>
+</html>
